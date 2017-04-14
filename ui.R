@@ -1,4 +1,5 @@
 library(shiny)
+library(LearnBayes)
 
 # Define User Interface
 shinyUI(pageWithSidebar(
@@ -9,17 +10,32 @@ shinyUI(pageWithSidebar(
     # Set up sidebar panel
     sidebarPanel(
         
+        # Line color
+        selectInput("color_choice", "Color:",
+                    choices = list("black", "blue", "red", "green"), selected = "black"),
+        
         # Alpha shape parameter
-        sliderInput("alpha", h2(HTML("&alpha;:")), 
-                    min = 0, max = 5, value = 1, step = 0.5),
+        sliderInput("alpha", HTML("&alpha;:"), 
+                    min = 0, max = 5, value = 1, step = 0.01),
         
         # Beta shape parameter
-        sliderInput("beta", h2(HTML("&beta;:")),
-                    min = 0, max = 5, value = 1, step = 0.5),
+        sliderInput("beta", HTML("&beta;:"),
+                    min = 0, max = 5, value = 1, step = 0.01),
         
-        # Line color
-        selectInput("color_choice", h2("Color:"),
-                    choices = list("black", "blue", "red", "green"), selected = "black")
+        # Quantile selection to caluclate alpha and beta
+        strong("Calculate alpha and beta based on two quantiles"),
+        fluidRow(
+            column(6, numericInput("q1", "Quantile 1:", 0.25)),
+            column(6, numericInput("p1", "Prob 1:", 0.25))
+        ),
+        
+        fluidRow(   
+            column(6, numericInput("q2", "Quantile 2:", 0.75)),
+            column(6, numericInput("p2", "Prob 2:", 0.75))
+        ),
+        
+        actionButton("go", "Go!")
+        
     ),
     
     # Show a table summarizing the values entered

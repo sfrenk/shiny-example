@@ -1,24 +1,37 @@
 library(shiny)
-library(ggplot2)
 
 # Define server logic
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
     
-    # Reactive expression to link slider input to output
-    output$plot <- renderPlot({
+    # Change plot when alpha and beta slider values change
+    vals <- reactive({
         
-        #hist(rnorm(n = 100, mean = input$mean, sd = input$sd))
+        alpha <- input$alpha
+        beta <- input$beta
+        
         x <- seq(0, 1, 0.01)
-        fx <- dbeta(x, shape1 = input$alpha, shape2 = input$beta)
         
-        ggplot()+
-            geom_smooth(aes(x = x, y = fx), color = input$color_choice, method = "loess", se = FALSE)+
-            scale_x_continuous(limits = c(0, 1), expand = c(0, 0))+
-            xlab("x")+
-            coord_cartesian(ylim = c(0, 2.5), expand = c(0,0))+
-            ylab("PDF")+
-            theme_bw()+
-            theme(panel.grid = element_blank())
+        curve(dbeta(x, alpha, beta), ylab = "PDF", col = input$color_choice)
+        
+    })
+    
+    # If user clicks "Go!", use provided quantile values to calculate alpha and beta
+    observeEvent(input$go, {
+        
+        params <- beta.select(list(p = input$q1, x = input$p1), list(p = input$q2, x = input$p2))
+        
+        alpha_param <- params[1]
+        beta_param <- params[2]
+        
+        updateSliderInput(session, "alpha", value = alpha_param)
+        updateSliderInput(session, "beta", value = beta_param)
+        
+    })
+    
+    # Render plot
+    output$plot <- renderPlot({
+        vals()
+
     })
     
 })
